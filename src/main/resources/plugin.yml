@@ -1,5 +1,5 @@
 name: ElytraVaults
-version: '1.0.0.0'
+version: '1.0.1.0'
 main: io.github.derec4.elytraVaults.ElytraVaults
 api-version: '1.21'
 prefix: DerexXD
