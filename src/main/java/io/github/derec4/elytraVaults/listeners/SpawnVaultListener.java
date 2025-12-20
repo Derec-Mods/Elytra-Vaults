@@ -70,7 +70,7 @@ public class SpawnVaultListener implements Listener {
     private void processFrame(ItemFrame frame) {
 //        pdcManager.markAsProcessed(frame);
 
-        Block placedBlock = placeBlock(frame.getLocation(), Material.DIAMOND_BLOCK);
+        Block placedBlock = placeBlock(frame.getLocation(), Material.VAULT);
 
 //        if (plugin.getConfigManager().isTextDisplayEnabled()) {
 //            textDisplayManager.spawnDisplay(placedBlock);
