@@ -16,9 +16,6 @@ public final class ElytraVaults extends JavaPlugin {
     public void onEnable() {
         // Initialize config
         configManager = new ConfigManager(this);
-        lootTableHandler = new LootTableHandler(this);
-
-        lootTableHandler.createElytraLootTable();
 
         getServer().getPluginManager().registerEvents(new SpawnVaultListener(this), this);
 
