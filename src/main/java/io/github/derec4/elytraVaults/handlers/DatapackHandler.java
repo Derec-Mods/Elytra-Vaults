@@ -92,14 +92,12 @@ public class DatapackHandler {
     }
 
     private void reloadDatapacks() {
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            try {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:datapack list");
-                plugin.getLogger().info("Datapacks reloaded");
-            } catch (Exception e) {
-                plugin.getLogger().warning("Could not reload datapacks automatically: " + e.getMessage());
-                plugin.getLogger().warning("You may need to run '/reload' or restart the server");
-            }
-        });
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:datapack list");
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:datapack enable \"file/" + DATAPACK_NAME +
+                    "\"");
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "reload");
+            plugin.getLogger().info("Datapack enabled and server reloaded");
+        }, 20L);
     }
 }
