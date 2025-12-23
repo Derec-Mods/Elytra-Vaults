@@ -34,7 +34,7 @@ public class BlockUtils {
             return null;
         }
 
-        NamespacedKey lootTableKey = new NamespacedKey(plugin, "elytra_vault");
+        NamespacedKey lootTableKey = new NamespacedKey("elytra_vault", "elytra_vault");
         LootTable lootTable = Bukkit.getLootTable(lootTableKey);
 
         vault.setKeyItem(new ItemStack(keyItemMaterial));
