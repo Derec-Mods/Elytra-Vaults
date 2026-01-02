@@ -80,11 +80,9 @@ public class SpawnVaultListener implements Listener {
         createElytraVault(placedBlock, plugin, keyItemMaterial);
 
         if (plugin.getConfigManager().isTextDisplayEnabled()) {
-            spawnVaultTextDisplays(placedBlock.getLocation(), keyItemMaterial);
+            spawnVaultTextDisplays(placedBlock.getLocation().subtract(0,1,0), keyItemMaterial);
         }
 
-        // Remove the item frame
         frame.remove();
-
     }
 }
