@@ -53,6 +53,8 @@ public class SpawnVaultListener implements Listener {
                 continue;
             }
 
+            plugin.getLogger().info("Elytra ItemFrame detected at " + frame.getLocation());
+
             if (shouldProcessFrame(frame)) {
                 processFrame(frame);
             }

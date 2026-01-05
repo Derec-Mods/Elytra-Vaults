@@ -96,8 +96,8 @@ public class DatapackHandler {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:datapack list");
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:datapack enable \"file/" + DATAPACK_NAME +
                     "\"");
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "reload");
-            plugin.getLogger().info("Datapack enabled and server reloaded");
+//            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "reload");
+            plugin.getLogger().info("Datapack enabled");
         }, 20L);
     }
 }
