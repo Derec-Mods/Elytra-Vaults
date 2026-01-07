@@ -8,11 +8,11 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
 
-import static io.github.derec4.elytraVaults.utils.BlockUtils.placeBlock;
 import static io.github.derec4.elytraVaults.utils.BlockUtils.createElytraVault;
 import static io.github.derec4.elytraVaults.utils.TextDisplayUtils.spawnVaultTextDisplays;
 
@@ -24,7 +24,7 @@ public class SpawnVaultListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChunkLoad(ChunkLoadEvent event) {
         if (event.getWorld().getEnvironment() != World.Environment.THE_END) {
             return;
