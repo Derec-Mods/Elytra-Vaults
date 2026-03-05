@@ -85,18 +85,23 @@ public class SpawnVaultListener implements Listener {
 //        Block placedBlock = placeBlock(frame.getLocation(), Material.VAULT);
 
         Location frameLocation = frame.getLocation();
+        plugin.getLogger().info("Processing frame at " + frameLocation);
 
         var vaultLocation = frameLocation.clone().subtract(0, 1, 0);
         Block vaultBlock = vaultLocation.getBlock();
+        plugin.getLogger().info("Placing vault at " + vaultLocation);
 
         Material keyItemMaterial = plugin.getConfigManager().getKeyItem();
         createElytraVault(vaultBlock, plugin, keyItemMaterial);
+        plugin.getLogger().info("Vault created with key item: " + keyItemMaterial);
 
         if (plugin.getConfigManager().isTextDisplayEnabled()) {
+            plugin.getLogger().info("Spawning text displays at " + vaultLocation);
             spawnVaultTextDisplays(vaultLocation, keyItemMaterial);
         }
 
         frame.remove();
+        plugin.getLogger().info("Frame removed");
     }
 
     /**
