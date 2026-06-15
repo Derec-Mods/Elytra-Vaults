@@ -8,21 +8,46 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.stream.Stream;
 
 public class DatapackHandler {
 
-    private final JavaPlugin plugin;
     private static final String DATAPACK_NAME = "ElytraVaultsHelper";
+    private final JavaPlugin plugin;
 
     public DatapackHandler(JavaPlugin plugin) {
         this.plugin = plugin;
     }
 
+    private boolean serverUsesNewWorldLayout() {
+        try {
+            String ver = null;
+            try {
+                ver = Bukkit.getMinecraftVersion();
+            } catch (NoSuchMethodError | NoClassDefFoundError e) {
+                plugin.getLogger().severe(e.getMessage());
+            }
+
+            if (ver == null || ver.isEmpty()) {
+                ver = Bukkit.getBukkitVersion();
+            }
+
+            if (ver == null) {
+                return false;
+            }
+
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("(\\d+)(?:\\.(\\d+))?(?:\\.(\\d+))?").matcher(ver);
+            if (m.find()) {
+                int major = Integer.parseInt(m.group(1));
+                return major >= 26; // threshold where layout changed (Paper/Minecraft 26+)
+            }
+        } catch (Exception e) {
+            plugin.getLogger().severe(e.getMessage());
+        }
+        return false;
+    }
+
     public void installDatapack() {
-        // Get the main world (overworld)
         World world = Bukkit.getWorlds().getFirst();
 
         if (world == null) {
@@ -30,7 +55,23 @@ public class DatapackHandler {
             return;
         }
 
-        File datapacksFolder = new File(world.getWorldFolder(), "datapacks");
+        // Prefer the server world container + world name for newer server layouts introduced in recent
+        // Minecraft/Paper versions. Fall back to the Bukkit-provided world folder for older servers.
+        File datapacksFolder;
+        try {
+            if (serverUsesNewWorldLayout()) {
+                File worldRoot = new File(Bukkit.getWorldContainer(), world.getName());
+                if (worldRoot.exists()) {
+                    datapacksFolder = new File(worldRoot, "datapacks");
+                } else {
+                    datapacksFolder = new File(world.getWorldFolder(), "datapacks");
+                }
+            } else {
+                datapacksFolder = new File(world.getWorldFolder(), "datapacks");
+            }
+        } catch (Exception ex) {
+            datapacksFolder = new File(world.getWorldFolder(), "datapacks");
+        }
         File targetDatapackFolder = new File(datapacksFolder, DATAPACK_NAME);
 
         if (targetDatapackFolder.exists() && isValidDatapack(targetDatapackFolder)) {
@@ -47,7 +88,7 @@ public class DatapackHandler {
         try {
             copyDatapackFromResources(targetDatapackFolder);
             plugin.getLogger().info("Successfully installed datapack '" + DATAPACK_NAME + "' to " + targetDatapackFolder.getPath());
-            
+
             // Reload datapacks so the server registers it
             reloadDatapacks();
         } catch (IOException e) {
@@ -70,8 +111,8 @@ public class DatapackHandler {
 
         // Copy loot table
         copyResourceFile(
-            DATAPACK_NAME + "/data/elytra_vault/loot_table/elytra_vault.json",
-            new File(dataFolder, "elytra_vault.json")
+                DATAPACK_NAME + "/data/elytra_vault/loot_table/elytra_vault.json",
+                new File(dataFolder, "elytra_vault.json")
         );
     }
 
@@ -80,7 +121,7 @@ public class DatapackHandler {
             if (inputStream == null) {
                 throw new IOException("Resource not found: " + resourcePath);
             }
-            
+
             Files.copy(inputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             plugin.getLogger().fine("Copied resource: " + resourcePath + " to " + targetFile.getPath());
         }
