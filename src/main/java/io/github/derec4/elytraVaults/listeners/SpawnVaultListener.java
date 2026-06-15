@@ -18,6 +18,11 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.loot.LootTable;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Collectors;
+
 import static io.github.derec4.elytraVaults.utils.BlockUtils.createElytraVault;
 import static io.github.derec4.elytraVaults.utils.TextDisplayUtils.spawnVaultTextDisplays;
 
@@ -91,9 +96,55 @@ public class SpawnVaultListener implements Listener {
         Block vaultBlock = vaultLocation.getBlock();
         plugin.getLogger().info("Placing vault at " + vaultLocation);
 
+        // Extra debug: world/datapacks details
+        try {
+            World world = frame.getWorld();
+            Path worldFolder = world.getWorldFolder().toPath();
+            Path datapacksDir = worldFolder.resolve("datapacks");
+            plugin.getLogger().info("World folder: " + worldFolder.toAbsolutePath());
+            plugin.getLogger().info("Datapacks dir exists: " + Files.exists(datapacksDir));
+            if (Files.exists(datapacksDir)) {
+                try {
+                    var entries = Files.list(datapacksDir)
+                            .map(Path::getFileName)
+                            .map(Path::toString)
+                            .collect(Collectors.joining(", "));
+                    plugin.getLogger().info("Datapacks entries: [" + entries + "]");
+                } catch (IOException e) {
+                    plugin.getLogger().severe("Failed listing datapacks dir: " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            plugin.getLogger().severe("Failed to read world folder/datapacks: " + e.getMessage());
+        }
+
         Material keyItemMaterial = plugin.getConfigManager().getKeyItem();
-        createElytraVault(vaultBlock, plugin, keyItemMaterial);
-        plugin.getLogger().info("Vault created with key item: " + keyItemMaterial);
+
+        // Debug expected loot table key
+        try {
+            var expectedKey = BlockUtils.getElytraVaultLootTableKey();
+            plugin.getLogger().info("Expected Elytra Vault loot table key: " + expectedKey);
+        } catch (Exception e) {
+            plugin.getLogger().severe("Failed to get expected loot table key: " + e.getMessage());
+        }
+
+        // Wrap createElytraVault with more context logging to catch new-format issues
+        try {
+            plugin.getLogger().info("Calling createElytraVault for block " + vaultBlock.getLocation() + " with key item " + keyItemMaterial);
+            createElytraVault(vaultBlock, plugin, keyItemMaterial);
+            plugin.getLogger().info("Vault created with key item: " + keyItemMaterial);
+        } catch (Throwable t) {
+            plugin.getLogger().severe("Failed to create Elytra Vault at " + vaultBlock.getLocation() + ": " + t.getClass().getName() + " - " + t.getMessage());
+            t.printStackTrace();
+            // log some block info
+            try {
+                plugin.getLogger().severe("Vault block type: " + vaultBlock.getType());
+                plugin.getLogger().severe("Vault block state: " + vaultBlock.getState());
+            } catch (Exception ex) {
+                plugin.getLogger().severe("Failed to read vault block details: " + ex.getMessage());
+            }
+            return; // bail out so we don't remove the frame if creation failed
+        }
 
         if (plugin.getConfigManager().isTextDisplayEnabled()) {
             plugin.getLogger().info("Spawning text displays at " + vaultLocation);
@@ -113,7 +164,23 @@ public class SpawnVaultListener implements Listener {
                 continue;
             }
             Vault vault = (Vault) block;
-            LootTable lootTable = vault.getLootTable();
+            LootTable lootTable;
+            try {
+                lootTable = vault.getLootTable();
+            } catch (Throwable t) {
+                plugin.getLogger().severe("Error getting loot table from vault at " + vault.getLocation() + ": " + t.getClass().getName() + " - " + t.getMessage());
+                t.printStackTrace();
+                continue;
+            }
+            if (lootTable == null) {
+                plugin.getLogger().info("Vault at " + vault.getLocation() + " has null LootTable (skipping)");
+                continue;
+            }
+            try {
+                plugin.getLogger().info("Vault loot table key: " + lootTable.getKey());
+            } catch (Exception e) {
+                plugin.getLogger().severe("Failed to read loot table key for vault at " + vault.getLocation() + ": " + e.getMessage());
+            }
             if (!lootTable.getKey().equals(BlockUtils.getElytraVaultLootTableKey())) {
                 continue;
             }
