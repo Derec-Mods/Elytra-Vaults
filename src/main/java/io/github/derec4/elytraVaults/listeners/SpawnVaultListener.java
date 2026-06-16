@@ -53,6 +53,13 @@ public class SpawnVaultListener implements Listener {
      */
     private void processItemFrames(ChunkLoadEvent event) {
         for (var entity : event.getChunk().getEntities()) {
+            try {
+                if (entity.getWorld().getEnvironment() != World.Environment.THE_END) {
+                    continue;
+                }
+            } catch (Exception ignored) {
+                continue;
+            }
             if (entity.getType() != EntityType.ITEM_FRAME) {
                 continue;
             }
@@ -88,6 +95,15 @@ public class SpawnVaultListener implements Listener {
     private void processFrame(ItemFrame frame) {
 //        pdcManager.markAsProcessed(frame);
 //        Block placedBlock = placeBlock(frame.getLocation(), Material.VAULT);
+        try {
+            if (frame.getWorld().getEnvironment() != World.Environment.THE_END) {
+                plugin.getLogger().info("Ignoring frame outside The End at " + frame.getLocation());
+                return;
+            }
+        } catch (Exception e) {
+            plugin.getLogger().severe("Failed environment check for frame: " + e.getMessage());
+            return;
+        }
 
         Location frameLocation = frame.getLocation();
         plugin.getLogger().info("Processing frame at " + frameLocation);
