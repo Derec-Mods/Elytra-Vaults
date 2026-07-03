@@ -3,8 +3,8 @@
 # Enable text display above vaults
 enable-text-display: true
 
-# Test mode (for development)
-test-mode: true
+# Test mode (extra console logging for development)
+test-mode: false
 
 # The material used as the key item to open the vault
 # Valid values are any Minecraft material name (e.g., SHULKER_SHELL, DIAMOND, GOLD_INGOT, etc.)
