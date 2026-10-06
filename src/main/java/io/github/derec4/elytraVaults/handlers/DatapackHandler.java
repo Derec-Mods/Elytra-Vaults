@@ -1,5 +1,6 @@
 package io.github.derec4.elytraVaults.handlers;
 
+import io.papermc.paper.datapack.Datapack;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -134,11 +135,14 @@ public class DatapackHandler {
 
     private void reloadDatapacks() {
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:datapack list");
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:datapack enable \"file/" + DATAPACK_NAME +
-                    "\"");
-//            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "reload");
-            plugin.getLogger().info("Datapack enabled");
+            Bukkit.getDatapackManager().refreshPacks();
+            Datapack datapack = Bukkit.getDatapackManager().getPack("file/" + DATAPACK_NAME);
+            if (null != datapack) {
+                datapack.setEnabled(true);
+                plugin.getLogger().info("Datapack enabled");
+            } else {
+                plugin.getLogger().warning("Datapack could not be enabled");
+            }
         }, 20L);
     }
 }
